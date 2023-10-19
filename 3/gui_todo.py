@@ -1,12 +1,13 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
+from tkcalendar import DateEntry
 
 class ToDoApp(tk.Tk):
     def __init__(self):
         super().__init__()
 
         self.title("ToDoリストアプリ")
-        self.geometry("400x300")
+        self.geometry("800x600")
 
         self.tasks = []
 
@@ -16,6 +17,13 @@ class ToDoApp(tk.Tk):
         # タスク追加エントリー
         self.task_entry = ttk.Entry(self)
         self.task_entry.pack(pady=20)
+
+        # 期限ラベル & 期限エントリー
+        self.deadline_label = ttk.Label(self, text="期限:")
+        self.deadline_label.pack(pady=5)
+        self.deadline_entry = DateEntry(self)
+        self.deadline_entry.pack(pady=5)
+
 
         # タスク追加ボタン
         self.add_button = ttk.Button(self, text="タスク追加", command=self.add_task)
@@ -34,8 +42,10 @@ class ToDoApp(tk.Tk):
 
     def add_task(self):
         task = self.task_entry.get()
+        deadline = self.deadline_entry.get()
+
         if task:
-            self.tasks.append(task)
+            self.tasks.append((task, deadline))
             self.update_listbox()
             self.task_entry.delete(0, tk.END)
         else:
@@ -45,11 +55,11 @@ class ToDoApp(tk.Tk):
         selected_index = self.task_listbox.curselection()
         if selected_index:
             index = selected_index[0]
-            task = self.tasks[index]
+            task, deadline = self.tasks[index]
             if task.startswith("[完了] "):
-                self.tasks[index] = task[6:]
+                self.tasks[index] = (task[6:], deadline)
             else:
-                self.tasks[index] = "[完了] " + task
+                self.tasks[index] = ("[完了] " + task, deadline)
             self.update_listbox()
 
     def delete_task(self):
@@ -60,8 +70,12 @@ class ToDoApp(tk.Tk):
 
     def update_listbox(self):
         self.task_listbox.delete(0, tk.END)
-        for task in self.tasks:
-            self.task_listbox.insert(tk.END, task)
+        for task, deadline in self.tasks:
+            # 期限が過ぎたタスクをハイライト
+            if deadline < self.deadline_entry.get():
+                self.task_listbox.insert(tk.END, f"{task} (期限: {deadline}) [期限超過]")
+            else:
+                self.task_listbox.insert(tk.END, f"{task} (期限: {deadline})")
 
 
 if __name__ == "__main__":
