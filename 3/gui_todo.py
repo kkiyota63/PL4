@@ -40,6 +40,10 @@ class ToDoApp(tk.Tk):
         self.delete_button = ttk.Button(self, text="タスク削除", command=self.delete_task)
         self.delete_button.pack(side=tk.LEFT, padx=10)
 
+        # タスク編集ボタン
+        self.edit_button = ttk.Button(self, text="タスク編集", command=self.edit_task)
+        self.edit_button.pack(side=tk.LEFT, padx=10)
+
     def add_task(self):
         task = self.task_entry.get()
         deadline = self.deadline_entry.get()
@@ -77,6 +81,39 @@ class ToDoApp(tk.Tk):
             else:
                 self.task_listbox.insert(tk.END, f"{task} (期限: {deadline})")
 
+    def edit_task(self):
+        selected_index = self.task_listbox.curselection()
+        if selected_index:
+            index = selected_index[0]
+            task, deadline = self.tasks[index]
+
+            # タスクと期限をEntryウィジェットに表示
+            self.task_entry.delete(0, tk.END)
+            self.task_entry.insert(0, task)
+            self.deadline_entry.set_date(deadline)
+
+            # タスク追加ボタンを非活性化して、編集完了ボタンを活性化
+            self.add_button.config(state=tk.DISABLED)
+            self.edit_button.config(text="編集完了", command=self.update_task)
+
+    def update_task(self):
+        selected_index = self.task_listbox.curselection()
+        if selected_index:
+            index = selected_index[0]
+            new_task = self.task_entry.get()
+            new_deadline = self.deadline_entry.get()
+
+            # 編集したタスクと期限を更新
+            if new_task:
+                self.tasks[index] = (new_task, new_deadline)
+                self.update_listbox()
+                self.task_entry.delete(0, tk.END)
+
+                # タスク追加ボタンを活性化して、編集完了ボタンを非活性化
+                self.add_button.config(state=tk.NORMAL)
+                self.edit_button.config(text="タスク編集", command=self.edit_task)
+            else:
+                messagebox.showwarning("警告", "タスクが入力されていません")
 
 if __name__ == "__main__":
     app = ToDoApp()
