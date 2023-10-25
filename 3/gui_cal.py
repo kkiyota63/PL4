@@ -1,12 +1,10 @@
 import tkinter as tk
 
-class CalculatorApp(tk.Tk):
-    def __init__(self):
-        super().__init__()
+class CalculatorApp(tk.Frame):
+    def __init__(self, master=None, **kwargs):
+        super().__init__(master, **kwargs)
 
-        self.title("電卓アプリ")
-        self.geometry("300x400")
-
+        self.grid(sticky="nsew")
         self.create_widgets()
 
     def create_widgets(self):
@@ -27,9 +25,9 @@ class CalculatorApp(tk.Tk):
         col = 0
 
         # ボタンの配置
-        #sticky="nsew" を使用すると、そのボタンやテキストボックスはセル内で最大のサイズになり、セル全体を占有する
         for button in buttons:
-            tk.Button(self, text=button, font=("Arial", 18)).grid(row=row, column=col, sticky="nsew", padx=5, pady=5)
+            tk.Button(self, text=button, font=("Arial", 18)).grid(row=row, column=col,
+                                                                  sticky="nsew", padx=5, pady=5)
             col += 1
             if col > 3:
                 col = 0
@@ -41,10 +39,9 @@ class CalculatorApp(tk.Tk):
             self.grid_rowconfigure(i, weight=1)
             self.grid_rowconfigure(4, weight=1)
 
-# CalculatorAppを継承したExtendedCalculatorAppを作成
 class ExtendedCalculatorApp(CalculatorApp):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, master=None, **kwargs):
+        super().__init__(master, **kwargs)
         # 平方根のボタンを追加
         self.sqrt_button = tk.Button(self, text="√", font=("Arial", 18), fg="blue")
         self.sqrt_button.grid(row=5, column=0, sticky="nsew", padx=5, pady=5)
@@ -53,6 +50,8 @@ class ExtendedCalculatorApp(CalculatorApp):
         self.grid_rowconfigure(5, weight=1)
 
 if __name__ == "__main__":
-    app = ExtendedCalculatorApp()
-    app.title("Extended Calculator")
-    app.mainloop()
+    root = tk.Tk()
+    root.title("電卓アプリ")
+    root.geometry("300x400")
+    app = ExtendedCalculatorApp(root)
+    root.mainloop()

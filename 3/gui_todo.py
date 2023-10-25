@@ -1,12 +1,15 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkcalendar import DateEntry
+import datetime
 
 class Task:
     def __init__(self, title, deadline):
         self.title = title
         self.deadline = deadline
         self.completed = False
+        self.added_date = datetime.datetime.now().date()  # タスクが追加された日付
+        self.last_updated = datetime.datetime.now().date()  # タスクが最後に更新された日付
 
     def toggle_completion(self):
         self.completed = not self.completed
@@ -43,33 +46,26 @@ class ToDoApp(tk.Tk):
         self.create_widgets()
 
     def create_widgets(self):
-        # タスク追加エントリー
         self.task_entry = ttk.Entry(self)
         self.task_entry.pack(pady=20)
 
-        # 期限ラベル & 期限エントリー
         self.deadline_label = ttk.Label(self, text="期限:")
         self.deadline_label.pack(pady=5)
         self.deadline_entry = DateEntry(self)
         self.deadline_entry.pack(pady=5)
 
-        # タスク追加ボタン
         self.add_button = ttk.Button(self, text="タスク追加", command=self.add_task)
         self.add_button.pack(pady=10)
 
-        # タスク表示リストボックス
-        self.task_listbox = tk.Listbox(self, height=10, width=50, selectmode=tk.SINGLE)
+        self.task_listbox = tk.Listbox(self, height=10, width=80, selectmode=tk.SINGLE)
         self.task_listbox.pack(pady=20)
 
-        # タスク完了ボタン
         self.complete_button = ttk.Button(self, text="タスク完了/未完了", command=self.toggle_task)
         self.complete_button.pack(side=tk.LEFT, padx=10)
 
-        # タスク削除ボタン
         self.delete_button = ttk.Button(self, text="タスク削除", command=self.delete_task)
         self.delete_button.pack(side=tk.LEFT, padx=10)
 
-        # タスク編集ボタン
         self.edit_button = ttk.Button(self, text="タスク編集", command=self.edit_task)
         self.edit_button.pack(side=tk.LEFT, padx=10)
 
@@ -100,10 +96,12 @@ class ToDoApp(tk.Tk):
         for task in self.task_manager.tasks:
             task_str = "[完了] " + task.title if task.completed else task.title
             deadline_str = f"(期限: {task.deadline})"
+            added_date_str = f"(追加日時: {task.added_date})"
+            last_updated_str = f"(最後の更新: {task.last_updated})"
             if task.is_overdue(self.deadline_entry.get()):
-                self.task_listbox.insert(tk.END, f"{task_str} {deadline_str} [期限超過]")
+                self.task_listbox.insert(tk.END, f"{task_str} {deadline_str} {added_date_str} {last_updated_str} [期限超過]")
             else:
-                self.task_listbox.insert(tk.END, f"{task_str} {deadline_str}")
+                self.task_listbox.insert(tk.END, f"{task_str} {deadline_str} {added_date_str} {last_updated_str}")
 
     def edit_task(self):
         selected_index = self.task_listbox.curselection()
@@ -112,8 +110,6 @@ class ToDoApp(tk.Tk):
             self.task_entry.delete(0, tk.END)
             self.task_entry.insert(0, task.title)
             self.deadline_entry.set_date(task.deadline)
-
-            # タスク追加ボタンを非活性化して、編集完了ボタンを活性化
             self.add_button.config(state=tk.DISABLED)
             self.edit_button.config(text="編集完了", command=self.update_task)
 
@@ -126,10 +122,9 @@ class ToDoApp(tk.Tk):
                 task = self.task_manager.get_task(selected_index[0])
                 task.title = new_task_title
                 task.deadline = new_deadline
+                task.last_updated = datetime.datetime.now().date()  # タスクの最後の更新日時を現在の日時に更新
                 self.update_listbox()
                 self.task_entry.delete(0, tk.END)
-
-                # タスク追加ボタンを活性化して、編集完了ボタンを非活性化
                 self.add_button.config(state=tk.NORMAL)
                 self.edit_button.config(text="タスク編集", command=self.edit_task)
             else:
