@@ -1,40 +1,38 @@
-from bottle import default_app, route, run
-import tkinter as tk
-from tkinter import scrolledtext
+from bottle import default_app, route, run, request, template
 import requests
+from bs4 import BeautifulSoup
 
-
-# GUI表示の関数
-def show_web_content(url):
-    response = requests.get(url)
-    content = ""
-
-    if response.status_code == 200:
-        content = response.text
-    else:
-        content = "Error fetching URL."
-
-    # GUIの初期化
-    root = tk.Tk()
-    root.title("Web Content Viewer")
-
-    text_widget = scrolledtext.ScrolledText(root, width=80, height=20)
-    text_widget.pack(padx=10, pady=10)
-
-    text_widget.insert(tk.END, content)
-    root.mainloop()
-
-# Webサーバ側の処理
 @route('/')
-def hello_world():
-    return 'Hello from Bottle!'
+def index():
+    return '''
+    <form action="/fetch" method="post">
+        URL: <input type="text" name="url">
+        <input type="submit" value="コンテンツを取得">
+    </form>
+    '''
 
-@route('/view/<url:path>')
-def fetch_and_view(url):
-    show_web_content("http://" + url)
-    return f"Displayed content from {url} in GUI."
+@route('/fetch', method='POST')
+def fetch_elements():
+    # フォームからURLを取得します
+    url = request.forms.get('url')
+
+    if not url:
+        return "URLを入力してください。"
+
+    # 指定されたURLの内容を取得します
+    response = requests.get(url)
+
+    # レスポンスのステータスが200 (OK) でない場合、エラーを返します
+    if response.status_code != 200:
+        return f"URLの取得に失敗しました。ステータスコード: {response.status_code}"
+
+    # Beautiful Soupでコンテンツを解析します
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    # 要素を抽出して表示します（簡単のため、テキストのみを取得します）
+    return soup.get_text()
 
 application = default_app()
 
-# ローカルで実行する場合には以下の行を使用
+# ローカルでアプリを実行します
 run(host='localhost', port=8080)
