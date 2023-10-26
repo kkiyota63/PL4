@@ -3,7 +3,7 @@ from bottle import default_app, route, run, request, template
 @route('/')
 def index():
     return '''
-    <h1>為替レート変換webアプリ</h1>
+    <h1>リアルタイム為替レート変換webアプリ</h1>
     <form action="/convert" method="post">
         金額 (USD): <input type="number" name="amount" step="0.01"><br>
         為替レート (1USD = ?JPY): <input type="number" name="rate" step="0.0001"><br>

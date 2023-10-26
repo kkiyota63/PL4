@@ -1,10 +1,17 @@
-from bottle import default_app, route, run, request, template
+from bottle import default_app, route, run, request, template, static_file
 import requests
 from bs4 import BeautifulSoup
+from wordcloud import WordCloud
+import os
+import re
+
+# 保存する画像の名前
+WC_IMG_NAME = "wordcloud.png"
 
 @route('/')
 def index():
     return '''
+    <h1>ワードクラウド生成アプリケーション</h1>
     <form action="/fetch" method="post">
         URL: <input type="text" name="url">
         <input type="submit" value="コンテンツを取得">
@@ -28,11 +35,23 @@ def fetch_elements():
 
     # Beautiful Soupでコンテンツを解析します
     soup = BeautifulSoup(response.content, 'html.parser')
+    text = soup.get_text()
 
-    # 要素を抽出して表示します（テキストのみを取得します）
-    return soup.get_text()
+    # 日本語の文字を除外
+    text_without_japanese = re.sub(r'[ぁ-んァ-ン一-龥]', '', text)
+
+    # ワードクラウドを生成します
+    wordcloud = WordCloud(background_color="white", width=800, height=800).generate(text_without_japanese)
+
+    # 画像として保存します
+    wordcloud.to_file(WC_IMG_NAME)
+
+    # 保存した画像を表示するHTMLを返します
+    return f'<img src="/{WC_IMG_NAME}" alt="ワードクラウド">'
+
+@route('/' + WC_IMG_NAME)
+def serve_image():
+    return static_file(WC_IMG_NAME, root=os.getcwd(), mimetype='image/png')
 
 application = default_app()
-
-# ローカルで実行する場合に以下を使用
 run(host='localhost', port=8080)
