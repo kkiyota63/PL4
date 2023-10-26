@@ -29,10 +29,10 @@ def fetch_elements():
     # Beautiful Soupでコンテンツを解析します
     soup = BeautifulSoup(response.content, 'html.parser')
 
-    # 要素を抽出して表示します（簡単のため、テキストのみを取得します）
+    # 要素を抽出して表示します（テキストのみを取得します）
     return soup.get_text()
 
 application = default_app()
 
-# ローカルでアプリを実行します
+# ローカルで実行する場合に以下を使用
 run(host='localhost', port=8080)
