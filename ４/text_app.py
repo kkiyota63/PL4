@@ -26,27 +26,27 @@ def fetch_elements():
     if not url:
         return "URLを入力してください。"
 
-    # 指定されたURLの内容を取得します
+    # 指定されたURLの内容を取得する
     response = requests.get(url)
 
-    # レスポンスのステータスが200 (OK) でない場合、エラーを返します
+    # レスポンスのステータスが200 (OK) でない場合、エラーを返す
     if response.status_code != 200:
         return f"URLの取得に失敗しました。ステータスコード: {response.status_code}"
 
-    # Beautiful Soupでコンテンツを解析します
+    # Beautiful Soupでコンテンツを解析する
     soup = BeautifulSoup(response.content, 'html.parser')
     text = soup.get_text()
 
-    # 日本語の文字を除外
+    # 日本語の文字を除外する
     text_without_japanese = re.sub(r'[ぁ-んァ-ン一-龥]', '', text)
 
-    # ワードクラウドを生成します
+    # ワードクラウドを生成する
     wordcloud = WordCloud(background_color="white", width=800, height=800).generate(text_without_japanese)
 
-    # 画像として保存します
+    # 画像として保存する
     wordcloud.to_file(WC_IMG_NAME)
 
-    # 保存した画像を表示するHTMLを返します
+    # 保存した画像を表示するHTMLを返す
     return f'<img src="/{WC_IMG_NAME}" alt="ワードクラウド">'
 
 @route('/' + WC_IMG_NAME)
