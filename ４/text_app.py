@@ -20,7 +20,7 @@ def index():
 
 @route('/fetch', method='POST')
 def fetch_elements():
-    # フォームからURLを取得します
+    # フォームからURLを取得する
     url = request.forms.get('url')
 
     if not url:
